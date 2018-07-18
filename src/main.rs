@@ -183,7 +183,7 @@ fn main() -> Result<()>{
         "{}/assets/base/config/input.ron",
         env!("CARGO_MANIFEST_DIR")
     );*/
-    let asset_loader = AssetLoader::new(format!("{}/assets",env!("CARGO_MANIFEST_DIR")).to_string(),"base");
+    let asset_loader = AssetLoader::new(&format!("{}/assets",env!("CARGO_MANIFEST_DIR")).to_string(),"base");
     let display_config_path = asset_loader.resolve_path("config/display.ron").unwrap();
     let key_bindings_path = asset_loader.resolve_path("config/input.ron").unwrap();
 
@@ -207,6 +207,8 @@ fn main() -> Result<()>{
         .with(NormalOrthoCameraSystem::default(), "aspect_ratio",&[])
         .with_basic_renderer(display_config_path, DrawFlat::<PosTex>::new(), false)?;
     let resources_directory = format!("{}", env!("CARGO_MANIFEST_DIR"));
-    Application::build(resources_directory, TestState)?.build(game_data_builder)?.run();
+    Application::build(resources_directory, TestState)?
+        .with_resource(asset_loader)
+        .build(game_data_builder)?.run();
     Ok(())
 }
