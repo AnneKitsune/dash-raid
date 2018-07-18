@@ -14,8 +14,9 @@ use amethyst::ecs::*;
 use amethyst::core::*;
 use amethyst::assets::*;
 use amethyst::renderer::*;
+use amethyst::renderer::mouse::set_mouse_cursor_none;
 use amethyst::Result;
-use amethyst::core::cgmath::Vector3;
+use amethyst::core::cgmath::{Vector3,Matrix4};
 
 use rand::{thread_rng, Rng};
 
@@ -23,12 +24,18 @@ use rand::{thread_rng, Rng};
 struct TestState;
 
 impl<'a,'b> State<GameData<'a,'b>> for TestState{
-    fn on_start(&mut self, data: StateData<GameData>) {
+    fn on_start(&mut self, mut data: StateData<GameData>) {
         data.world.add_resource(
             Music{
                 music: vec![].into_iter().cycle(),
             }
         );
+
+        let _ = create_default_ortho_camera(&mut data.world);
+        create_mouse_cursor(&mut data.world);
+        //data.world.add_resource(ActiveCamera{entity: cam});
+
+        set_mouse_cursor_none(&mut data.world.write_resource());
 
         let texture = {
             let loader = data.world.read_resource::<Loader>();
@@ -77,6 +84,7 @@ impl Component for Bullet{
     type Storage = DenseVecStorage<Self>;
 }
 
+
 pub struct BulletMoverSystem;
 
 impl<'a> System<'a> for BulletMoverSystem{
@@ -107,6 +115,7 @@ impl<'a> System<'a> for BulletEmitterSystem{
             self.last_spawn = time.absolute_time_seconds();
 
             let mut tr = Transform::default();
+            tr.translation = [0.5,0.5,0.0].into();
             tr.scale = [0.001, 0.001, 0.001].into();
             let new_bullet = entities.build_entity()
                 .with(tr, &mut transforms)
@@ -119,11 +128,46 @@ impl<'a> System<'a> for BulletEmitterSystem{
     }
 }
 
-pub fn create_default_ortho_camera(world: &mut World) {
+pub struct Cursor{
+    pub texture: Handle<Texture>,
+}
+impl Component for Cursor{
+    type Storage = VecStorage<Self>;
+}
+
+pub fn create_mouse_cursor(world: &mut World) -> Entity{
+    let mut tr = Transform::default();
+    tr.scale = [0.001, 0.001, 0.001].into();
+
+    let cursor_texture = {
+        let asset_loader = world.read_resource::<AssetLoader>();
+        asset_loader.load("sprites/test_particle.png",PngFormat,
+                          Default::default(),&mut world.write_resource(),
+                          &mut world.write_resource(),&world.read_resource()).unwrap()
+    };
+
+    let sprite = Sprite{
+        left: 0.,
+        right: 64.,
+        top: 0.,
+        bottom: 64.,
+    };
+
     world.create_entity()
-        .with(Transform::default())
+        .with(tr)
+        .with(GlobalTransform::default())
+        .with(FollowMouse)
+        .with(Cursor{texture: cursor_texture.clone()})
+        .with_sprite(&sprite,cursor_texture,(64.0,64.0)).unwrap()
+        .build()
+}
+
+
+pub fn create_default_ortho_camera(world: &mut World) -> Entity{
+    world.create_entity()
+        .with(GlobalTransform(Matrix4::from_translation(Vector3::new(0.0, 0.0, 1.0)).into(), ))
         .with(Camera::from(Projection::orthographic(0., 1., 1., 0.)))
-        .build();
+        .build()
 }
 
 fn main() -> Result<()>{
@@ -143,7 +187,8 @@ fn main() -> Result<()>{
     let game_data_builder = GameDataBuilder::default()
         .with(BulletMoverSystem,"bullet_mover",&[])
         .with(BulletEmitterSystem::default(),"bullet_emitter",&[])
-        .with_bundle(TransformBundle::new().with_dep(&["bullet_mover","bullet_emitter"]))?
+        .with(FollowMouseSystem::<String,String>::default(),"follow_mouse",&[])
+        .with_bundle(TransformBundle::new().with_dep(&["bullet_mover","bullet_emitter","follow_mouse"]))?
         .with_bundle(
             InputBundle::<String, String>::new().with_bindings_from_file(&key_bindings_path)?,
         )?
