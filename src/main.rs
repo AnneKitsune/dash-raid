@@ -174,7 +174,7 @@ fn main() -> Result<()>{
     //let mut game_data_builder = amethyst_gamedata_base_2d(env!("CARGO_MANIFEST_DIR")).unwrap();
     amethyst::start_logger(Default::default());
 
-    let display_config_path = format!(
+    /*let display_config_path = format!(
         "{}/assets/base/config/display.ron",
         env!("CARGO_MANIFEST_DIR")
     );
@@ -182,7 +182,10 @@ fn main() -> Result<()>{
     let key_bindings_path = format!(
         "{}/assets/base/config/input.ron",
         env!("CARGO_MANIFEST_DIR")
-    );
+    );*/
+    let asset_loader = AssetLoader::new(format!("{}/assets",env!("CARGO_MANIFEST_DIR")).to_string(),"base");
+    let display_config_path = asset_loader.resolve_path("config/display.ron").unwrap();
+    let key_bindings_path = asset_loader.resolve_path("config/input.ron").unwrap();
 
     let game_data_builder = GameDataBuilder::default()
         .with(BulletMoverSystem,"bullet_mover",&[])
