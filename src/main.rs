@@ -20,6 +20,13 @@ use amethyst::core::cgmath::{Vector3,Matrix4};
 
 use rand::{thread_rng, Rng};
 
+mod data;
+mod systems;
+mod states;
+
+use data::*;
+use systems::*;
+use states::*;
 
 struct TestState;
 
