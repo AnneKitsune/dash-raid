@@ -1,5 +1,5 @@
-mod emitter;
-mod bullet;
+mod bullet_emitter;
+mod bullet_mover;
 
-pub use emitter::*;
-pub use bullet::*;
+pub use self::bullet_emitter::*;
+pub use self::bullet_mover::*;

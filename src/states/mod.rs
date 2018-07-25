@@ -1,2 +1,5 @@
 mod game;
-pub use game::*;
+mod test;
+
+pub use self::game::*;
+pub use self::test::*;

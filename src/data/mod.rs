@@ -1,5 +1,5 @@
 mod bullet;
-mod components;
+mod bullet_emitter;
 
-pub use bullet::*;
-pub use components::*;
+pub use self::bullet::Bullet;
+pub use self::bullet_emitter::BulletEmitter;
