@@ -2,9 +2,10 @@ use amethyst::core::timing::Time;
 use amethyst::core::{GlobalTransform, Transform};
 use amethyst::ecs::{Entities, Read, ReadExpect, System, WriteStorage};
 use amethyst_extra::DestroyInTime;
+use amethyst::renderer::{MeshHandle,Material};
 use rand::{thread_rng, Rng};
 
-use data::Bullet;
+use data::{Bullet,BulletRes};
 
 #[derive(Default)]
 pub struct BulletEmitterSystem {
@@ -20,7 +21,8 @@ impl<'a> System<'a> for BulletEmitterSystem {
         WriteStorage<'a, GlobalTransform>,
         WriteStorage<'a, Bullet>,
         WriteStorage<'a, DestroyInTime>,
-        SpriteRenderData<'a>,
+        WriteStorage<'a, MeshHandle>,
+        WriteStorage<'a, Material>,
     );
     fn run(
         &mut self,
@@ -32,7 +34,8 @@ impl<'a> System<'a> for BulletEmitterSystem {
             mut global_transforms,
             mut bullets,
             mut destroy_in_times,
-            mut sprite_render_data,
+            mut meshes,
+            mut materials,
         ): Self::SystemData,
     ) {
         if time.absolute_time_seconds() > self.last_spawn + 0.05 {
@@ -56,15 +59,9 @@ impl<'a> System<'a> for BulletEmitterSystem {
                     &mut bullets,
                 )
                 .with(DestroyInTime { timer: 5.0 }, &mut destroy_in_times)
+                .with(bullet_res.mesh.clone(), &mut meshes)
+                .with(bullet_res.material.clone(), &mut materials)
                 .build();
-            sprite_render_data
-                .add(
-                    new_bullet,
-                    &bullet_res.sprite,
-                    bullet_res.texture.clone(),
-                    (64.0, 64.0),
-                )
-                .expect("Failed to build test sprite");
         }
     }
 }

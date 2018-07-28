@@ -18,6 +18,8 @@ use amethyst::ui::*;
 use amethyst::Result;
 use amethyst_extra::*;
 
+use std::env;
+
 mod data;
 mod states;
 mod systems;
@@ -30,9 +32,17 @@ pub use utils::*;
 
 fn main() -> Result<()> {
     amethyst::start_logger(Default::default());
-
+    // run_dir() -> String
+    let bin_path = env::args().next().expect("Failed to get binary executable path");
+    let last_slash_index = bin_path.rfind("/").expect("Failed to get last slash in binary path.");
+    let mut base_path = bin_path[..last_slash_index].to_string();
+    
+    if base_path.contains("target/"){
+        base_path = String::from(".");
+    }
+    
     let asset_loader = AssetLoader::new(
-        &format!("{}/assets", env!("CARGO_MANIFEST_DIR")).to_string(),
+        &format!("{}/assets", base_path).to_string(),
         "base",
     );
     let display_config_path = asset_loader.resolve_path("config/display.ron").unwrap();
@@ -41,6 +51,9 @@ fn main() -> Result<()> {
     let game_data_builder = GameDataBuilder::default()
         .with(BulletMoverSystem, "bullet_mover", &[])
         .with(BulletEmitterSystem::default(), "bullet_emitter", &[])
+        .with_bundle(
+            InputBundle::<String, String>::new().with_bindings_from_file(&key_bindings_path)?
+        )?
         .with(
             FollowMouseSystem::<String, String>::default(),
             "follow_mouse",
@@ -51,9 +64,6 @@ fn main() -> Result<()> {
             "bullet_emitter",
             "follow_mouse",
         ]))?
-        .with_bundle(
-            InputBundle::<String, String>::new().with_bindings_from_file(&key_bindings_path)?
-        )?
         .with_bundle(UiBundle::<String, String>::new())?
         .with_bundle(AnimationBundle::<u32, Material>::new(
             "animation_control_system",
@@ -63,7 +73,7 @@ fn main() -> Result<()> {
         .with(TimedDestroySystem, "timed_destroy", &[])
         .with(NormalOrthoCameraSystem::default(), "aspect_ratio", &[])
         .with_basic_renderer(display_config_path, DrawFlat::<PosTex>::new(), false)?;
-    let resources_directory = format!("{}", env!("CARGO_MANIFEST_DIR"));
+    let resources_directory = format!("");
     Application::build(resources_directory, TestState)?
         .with_resource(asset_loader)
         .build(game_data_builder)?
