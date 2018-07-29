@@ -17,6 +17,7 @@ use amethyst::renderer::*;
 use amethyst::ui::*;
 use amethyst::Result;
 use amethyst_extra::*;
+use amethyst::utils::scene::BasicScenePrefab;
 
 use std::env;
 
@@ -70,9 +71,11 @@ fn main() -> Result<()> {
             "sampler_interpolation_system",
         ))?
         .with_bundle(AudioBundle::new(|music: &mut Music| music.music.next()))?
+        .with(PrefabLoaderSystem::<BasicScenePrefab<Vec<PosTex>>>::default(), "", &[])
         .with(TimedDestroySystem, "timed_destroy", &[])
         .with(NormalOrthoCameraSystem::default(), "aspect_ratio", &[])
-        .with_basic_renderer(display_config_path, DrawFlat::<PosTex>::new(), false)?;
+        .with(VisibilitySortingSystem::new(), "visibility", &["transform_system"])
+        .with_basic_renderer(display_config_path, DrawFlat::<PosTex>::new().with_transparency(ColorMask::all(), ALPHA, None), true)?;
     let resources_directory = format!("");
     Application::build(resources_directory, TestState)?
         .with_resource(asset_loader)

@@ -1,0 +1,16 @@
+#![enable(implicit_some)]
+Text(
+    transform: (
+        id: "hp_bar",
+        anchor: TopMiddle,
+        x: 0.,
+        y: -25.,
+        z: 1.,
+        width: 1024.,
+        height: 50.,
+        transparent: false,
+    ),
+    image: (
+        image: File("assets/base/sprites/hp_bar.png", Png, ()),
+    ),
+)

@@ -3,20 +3,22 @@ use amethyst::core::{GlobalTransform, Transform};
 use amethyst::ecs::{Entity, World,SystemData};
 use amethyst::prelude::Builder;
 use amethyst::assets::Handle;
-use amethyst::renderer::{Camera, PngFormat, Projection,Sprite,WithSpriteRender,Texture,Mesh,SpriteRenderData,Material};
+use amethyst::renderer::{Camera, PngFormat, Projection,Sprite,WithSpriteRender,Texture,Mesh,SpriteRenderData,Material,Transparent};
 use amethyst_extra::{AssetLoader, AssetLoaderInternal, FollowMouse};
 
 pub fn create_mouse_cursor(world: &mut World) -> Entity {
     let mut tr = Transform::default();
-    tr.scale = [0.001, 0.001, 0.001].into();
+    tr.translation = [0.0,0.0,10.0].into();
+    tr.scale = [0.001, 0.001, 1.0].into();
     
-    let (mesh,mat) = mesh_material_single_png(world, "sprites/test_particle.png", (64.0,64.0));
+    let (mesh,mat) = mesh_material_single_png(world, "sprites/cursor.png", (32.0,32.0));
     world
         .create_entity()
         .with(tr)
         .with(GlobalTransform::default())
         .with(FollowMouse)
         .with(mesh)
+        .with(Transparent)
         .with(mat)
         .build()
 }
@@ -54,7 +56,7 @@ pub fn create_default_ortho_camera(world: &mut World) -> Entity {
     world
         .create_entity()
         .with(GlobalTransform(
-            Matrix4::from_translation(Vector3::new(0.0, 0.0, 1.0)).into(),
+            Matrix4::from_translation(Vector3::new(0.0, 0.0, 100.0)).into(),
         ))
         .with(Camera::from(Projection::orthographic(0., 1., 1., 0.)))
         .build()
