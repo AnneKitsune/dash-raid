@@ -45,9 +45,9 @@ impl<'a, 'b> State<GameData<'a, 'b>> for TestState {
             .build();
 
 
-        data.world.exec(|mut creator: UiCreator| {
+        /*data.world.exec(|mut creator: UiCreator| {
             creator.create("assets/base/ui/gameplay.ron", ());
-        });
+        });*/
 
 
         data.world.add_resource(bullet_res);

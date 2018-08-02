@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Joël Lupien (Jojolepro) <jojolepromain@gmail.com>"]
 
 [dependencies]
-amethyst = { git = "https://github.com/amethyst/amethyst", branch = "develop", features = ["nightly"] }
+amethyst = { git = "https://github.com/amethyst/amethyst", branch = "develop", features = ["nightly","profiler"] }
 #amethyst-extra = { git = "https://github.com/jojolepro/amethyst-extra" }
 amethyst-extra = { path = "../amethyst-extra" }
 log = "0.4.3"
