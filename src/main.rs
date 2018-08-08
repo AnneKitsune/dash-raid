@@ -33,17 +33,9 @@ pub use utils::*;
 
 fn main() -> Result<()> {
     amethyst::start_logger(Default::default());
-    // run_dir() -> String
-    let bin_path = env::args().next().expect("Failed to get binary executable path");
-    let last_slash_index = bin_path.rfind("/").expect("Failed to get last slash in binary path.");
-    let mut base_path = bin_path[..last_slash_index].to_string();
-    
-    if base_path.contains("target/"){
-        base_path = String::from(".");
-    }
-    
+
     let asset_loader = AssetLoader::new(
-        &format!("{}/assets", base_path).to_string(),
+        &format!("{}/assets", get_working_dir()).to_string(),
         "base",
     );
     let display_config_path = asset_loader.resolve_path("config/display.ron").unwrap();
